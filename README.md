@@ -9,3 +9,5 @@ https://share-dev.osf.io/api/v1/app/6qajn/
 Then, gathers some descriptions...
 
 And spits out a line of text! 
+
+Guidance from [This Article](https://realpython.com/blog/python/lyricize-a-flask-app-to-create-lyrics-using-markov-chains/) along with [this example code](https://github.com/ketaro/markov-cranberries/blob/master/markov.py) from the article. 

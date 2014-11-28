@@ -7,11 +7,12 @@ import requests
 OSF_URL = 'http://share-dev.osf.io/api/v1/app/6qajn/?page:{}'
 
 
-def get_string(pages=10):
+def get_title_and_description(pages=10):
     ''' Goes to the SHARE API endpoint and grab some pages
     of text from description, and returns a string
     '''
-    text = ''
+    title = ''
+    description = ''
     for page in range(0, pages):
         items = requests.get(OSF_URL.format(page), verify=False)
 
@@ -19,9 +20,10 @@ def get_string(pages=10):
         results = page_text['results']
 
         for item in results:
-            text += item['description']
+            description += item['description']
+            title += item['title']
 
-    return text
+    return title, description
 
 
 def make_markov_chain(text):
@@ -68,22 +70,30 @@ def generate_paragraph(markov_chain, lines=3):
     return paragraph
 
 
-def generate_title(markov_chain):
-    title = list(random.choice(markov_chain.keys()))
+def fix_title(line):
+    title = line
+    for line_index, word in enumerate(line.split()):
+        if word[0].islower() and word != word.upper() and word != word.lower():
+            for letter in word:
+                if letter.isupper():
+                    title = line[:line_index]
+                    import pdb; pdb.set_trace()
 
-    title_enders = ['?', '.', '!', ',']
+    return title
 
-    while title[-1][-1] not in title_enders:
-        next_words = markov_chain[tuple(title[-2:])]
-        title += [random.choice(next_words)]
 
-    return ' '.join(title[:-1]).title()
+def generate_article():
+    title_str, description_str = get_title_and_description()
+    title_chain = make_markov_chain(title_str)
+    description_chain = make_markov_chain(description_str)
+    long_title = generate_line(title_chain)
+    title = fix_title(long_title)
+    description = generate_paragraph(description_chain, 2)
+
+    print(title)
+    print('------')
+    print(description)
 
 
 if __name__ == '__main__':
-    text = get_string()
-    markov_chain = make_markov_chain(text)
-    line = generate_line(markov_chain)
-    paragraph = generate_paragraph(markov_chain, 5)
-    title = generate_title(markov_chain)
-    print(line)
+    generate_article()

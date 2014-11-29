@@ -52,11 +52,12 @@ def generate_line(markov_chain):
 
     line = list(start)
 
-    line_enders = ['?', '.', '!']
+    line_enders = ['?', '.', '!', '\n  ']
 
     while line[-1][-1] not in line_enders:
         next_words = markov_chain[tuple(line[-2:])]
         line += [random.choice(next_words)]
+        # line += ' '
 
     return ' '.join(line)
 
@@ -72,11 +73,12 @@ def generate_paragraph(markov_chain, lines=3):
 
 def fix_title(line):
     title = line
-    for line_index, word in enumerate(line.split()):
+    for word in line.split():
         if word[0].islower() and word != word.upper() and word != word.lower():
             for letter in word:
                 if letter.isupper():
-                    title = line[:line_index]
+                    title_index = line.index(word)
+                    title = line[:title_index]
                     import pdb; pdb.set_trace()
 
     return title

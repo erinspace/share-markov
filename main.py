@@ -4,10 +4,10 @@ import random
 
 import requests
 
-OSF_URL = 'http://share-dev.osf.io/api/v1/app/6qajn/?page:{}'
+OSF_URL = 'http://share-dev.osf.io/api/v1/app/6qajn/?q=source:plos&page:{}'
 
 
-def get_title_and_description(pages=10):
+def get_title_and_description(pages=1):
     ''' Goes to the SHARE API endpoint and grab some pages
     of text from description, and returns a string
     '''
@@ -20,8 +20,8 @@ def get_title_and_description(pages=10):
         results = page_text['results']
 
         for item in results:
-            description += item['description']
-            title += item['title']
+            description += item['description'] + ' '
+            title += item['title'] + ' '
 
     return title, description
 
@@ -43,7 +43,7 @@ def make_markov_chain(text):
     return markov_chain
 
 
-def generate_line(markov_chain):
+def generate_line(markov_chain, title=False, title_words=10):
     ''' Takes a dict of markov chains and returns random text!'''
 
     start = ' '
@@ -52,12 +52,16 @@ def generate_line(markov_chain):
 
     line = list(start)
 
-    line_enders = ['?', '.', '!', '\n  ']
+    line_enders = ['?', '.', '!']
 
-    while line[-1][-1] not in line_enders:
-        next_words = markov_chain[tuple(line[-2:])]
-        line += [random.choice(next_words)]
-        # line += ' '
+    if title:
+        while len(line) < title_words:
+            next_words = markov_chain[tuple(line[-2:])]
+            line += [random.choice(next_words)]
+    else:
+        while line[-1][-1] not in line_enders:
+            next_words = markov_chain[tuple(line[-2:])]
+            line += [random.choice(next_words)]
 
     return ' '.join(line)
 
@@ -71,26 +75,12 @@ def generate_paragraph(markov_chain, lines=3):
     return paragraph
 
 
-def fix_title(line):
-    title = line
-    for word in line.split():
-        if word[0].islower() and word != word.upper() and word != word.lower():
-            for letter in word:
-                if letter.isupper():
-                    title_index = line.index(word)
-                    title = line[:title_index]
-                    import pdb; pdb.set_trace()
-
-    return title
-
-
 def generate_article():
     title_str, description_str = get_title_and_description()
     title_chain = make_markov_chain(title_str)
     description_chain = make_markov_chain(description_str)
-    long_title = generate_line(title_chain)
-    title = fix_title(long_title)
-    description = generate_paragraph(description_chain, 2)
+    title = generate_line(title_chain, title=True)
+    description = generate_paragraph(description_chain, 5)
 
     print(title)
     print('------')

@@ -43,7 +43,17 @@ def make_markov_chain(text):
     return markov_chain
 
 
-def generate_line(markov_chain, title=False, title_words=10):
+def get_character_count(line):
+    count = 0
+    for word in line:
+        for char in word:
+            count += 1
+        # count += 1
+
+    return count
+
+
+def generate_line(markov_chain, title=False, title_words=10, twitter=False):
     ''' Takes a dict of markov chains and returns random text!'''
 
     start = ' '
@@ -58,6 +68,14 @@ def generate_line(markov_chain, title=False, title_words=10):
         while len(line) < title_words:
             next_words = markov_chain[tuple(line[-2:])]
             line += [random.choice(next_words)]
+    if twitter:
+        while get_character_count(line) < 124:
+            print(get_character_count(line))
+            next_words = markov_chain[tuple(line[-2:])]
+            random_next = [random.choice(next_words)]
+            # if get_character_count(line+random_next) < 124:
+            line += random_next
+
     else:
         while line[-1][-1] not in line_enders:
             next_words = markov_chain[tuple(line[-2:])]
@@ -71,6 +89,7 @@ def generate_paragraph(markov_chain, lines=3):
 
     for i in range(lines - 1):
         paragraph += generate_line(markov_chain)
+        paragraph += ' '
 
     return paragraph
 
@@ -80,12 +99,16 @@ def generate_article():
     title_chain = make_markov_chain(title_str)
     description_chain = make_markov_chain(description_str)
     title = generate_line(title_chain, title=True)
-    description = generate_paragraph(description_chain, 5)
+    description = generate_paragraph(description_chain, 1)
+    twitter = generate_line(description_chain, twitter=True)
 
+    print ('     ')
     print(title)
     print('------')
     print(description)
-
+    print('------')
+    print('tweet: {} #MarkovScience'.format(twitter))
+    print(get_character_count('o hai der'))
 
 if __name__ == '__main__':
     generate_article()

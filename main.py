@@ -1,8 +1,14 @@
 # markov chain title and description generator from SHARE results
 
+import time
+
 import random
 
+import tweepy
+
 import requests
+
+import settings
 
 OSF_URL = 'http://share-dev.osf.io/api/v1/app/6qajn/?q=source:plos&page:{}'
 
@@ -69,8 +75,8 @@ def generate_line(markov_chain, title=False, title_words=10, twitter=False):
             next_words = markov_chain[tuple(line[-2:])]
             line += [random.choice(next_words)]
     if twitter:
-        while get_character_count(line) < 124:
-            print(get_character_count(line))
+        while get_character_count(line) < 105:
+            # print(get_character_count(line))
             next_words = markov_chain[tuple(line[-2:])]
             random_next = [random.choice(next_words)]
             # if get_character_count(line+random_next) < 124:
@@ -96,19 +102,41 @@ def generate_paragraph(markov_chain, lines=3):
 
 def generate_article():
     title_str, description_str = get_title_and_description()
-    title_chain = make_markov_chain(title_str)
+    # title_chain = make_markov_chain(title_str)
     description_chain = make_markov_chain(description_str)
-    title = generate_line(title_chain, title=True)
-    description = generate_paragraph(description_chain, 1)
+    # title = generate_line(title_chain, title=True)
+    # description = generate_paragraph(description_chain, 1)
     twitter = generate_line(description_chain, twitter=True)
 
-    print ('     ')
-    print(title)
-    print('------')
-    print(description)
-    print('------')
+    # print ('     ')
+    # print(title)
+    # print('------')
+    # print(description)
+    # print('------')
     print('tweet: {} #MarkovScience'.format(twitter))
     print(get_character_count('o hai der'))
 
+
+def get_tweet():
+    title_str, description_str = get_title_and_description()
+    description_chain = make_markov_chain(description_str)
+    tweet = generate_line(description_chain, twitter=True) + ' #MarkovScience'
+
+    while get_character_count(tweet) > 140:
+        tweet = generate_line(description_chain, twitter=True) + ' #MarkovScience'
+
+    # print twitter
+    return tweet
+
+
+def tweet():
+    tweet = get_tweet()
+    auth = tweepy.OAuthHandler(settings.CONSUMER_KEY, settings.CONSUMER_SECRET)
+    auth.set_access_token(settings.ACCESS_KEY, settings.ACCESS_SECRET)
+    api = tweepy.API(auth)
+
+    api.update_status(tweet)
+
+
 if __name__ == '__main__':
-    generate_article()
+    tweet()

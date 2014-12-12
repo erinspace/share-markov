@@ -123,7 +123,8 @@ def get_tweet():
     tweet = generate_line(description_chain, twitter=True) + ' #MarkovScience'
 
     while get_character_count(tweet) > 140:
-        tweet = generate_line(description_chain, twitter=True) + ' #MarkovScience'
+        tweet = generate_line(
+            description_chain, twitter=True) + ' #MarkovScience'
 
     # print twitter
     return tweet

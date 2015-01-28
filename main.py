@@ -1,11 +1,8 @@
 # markov chain title and description generator from SHARE results
 
-import time
-
 import random
 
 import tweepy
-
 import requests
 
 import settings
@@ -108,14 +105,6 @@ def generate_article():
     # description = generate_paragraph(description_chain, 1)
     twitter = generate_line(description_chain, twitter=True)
 
-    # print ('     ')
-    # print(title)
-    # print('------')
-    # print(description)
-    # print('------')
-    print('tweet: {} #MarkovScience'.format(twitter))
-    print(get_character_count('o hai der'))
-
 
 def get_tweet():
     title_str, description_str = get_title_and_description()
@@ -126,7 +115,7 @@ def get_tweet():
         tweet = generate_line(
             description_chain, twitter=True) + ' #MarkovScience'
 
-    # print twitter
+    print tweet
     return tweet
 
 

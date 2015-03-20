@@ -7,7 +7,7 @@ import requests
 
 import settings
 
-OSF_URL = 'http://share-dev.osf.io/api/v1/app/6qajn/?q=source:plos&page:{}'
+OSF_URL = 'https://osf.io/api/v1/share/?page:{}'
 
 
 def get_title_and_description(pages=1):
@@ -129,4 +129,5 @@ def tweet():
 
 
 if __name__ == '__main__':
+    # get_tweet()
     tweet()

@@ -1,4 +1,4 @@
-scrapi-markov
+SHARE Markov Description Generator and Tweeter
 =============
 
 Generate random bits of science text from descriptions in the SHARE notification service! 

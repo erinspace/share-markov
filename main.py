@@ -1,5 +1,7 @@
 # markov chain title and description generator from SHARE results
 
+import sys
+import getopt
 import random
 
 import tweepy
@@ -7,17 +9,19 @@ import requests
 
 import settings
 
-OSF_URL = 'https://osf.io/api/v1/share/?page:{}'
+OSF_URL = 'https://osf.io/api/v1/share/?q={}&size=250&start={}'
 
 
-def get_title_and_description(pages=1):
+def get_title_and_description(q, pages):
     ''' Goes to the SHARE API endpoint and grab some pages
-    of text from description, and returns a string
+    of text from title description, and returns a string
     '''
     title = ''
     description = ''
-    for page in range(0, pages):
-        items = requests.get(OSF_URL.format(page), verify=False)
+    start = 0
+    for page in range(0, int(pages)):
+        print(OSF_URL.format(q, start))
+        items = requests.get(OSF_URL.format(q, start), verify=False)
 
         page_text = items.json()
         results = page_text['results']
@@ -25,6 +29,8 @@ def get_title_and_description(pages=1):
         for item in results:
             description += item['description'] + ' '
             title += item['title'] + ' '
+
+        start += 250
 
     return title, description
 
@@ -73,10 +79,8 @@ def generate_line(markov_chain, title=False, title_words=10, twitter=False):
             line += [random.choice(next_words)]
     if twitter:
         while get_character_count(line) < 105:
-            # print(get_character_count(line))
             next_words = markov_chain[tuple(line[-2:])]
             random_next = [random.choice(next_words)]
-            # if get_character_count(line+random_next) < 124:
             line += random_next
 
     else:
@@ -87,27 +91,8 @@ def generate_line(markov_chain, title=False, title_words=10, twitter=False):
     return ' '.join(line)
 
 
-def generate_paragraph(markov_chain, lines=3):
-    paragraph = generate_line(markov_chain)
-
-    for i in range(lines - 1):
-        paragraph += generate_line(markov_chain)
-        paragraph += ' '
-
-    return paragraph
-
-
-def generate_article():
-    title_str, description_str = get_title_and_description()
-    # title_chain = make_markov_chain(title_str)
-    description_chain = make_markov_chain(description_str)
-    # title = generate_line(title_chain, title=True)
-    # description = generate_paragraph(description_chain, 1)
-    twitter = generate_line(description_chain, twitter=True)
-
-
-def get_tweet():
-    title_str, description_str = get_title_and_description()
+def get_tweet(q, pages):
+    title_str, description_str = get_title_and_description(q, pages)
     description_chain = make_markov_chain(description_str)
     tweet = generate_line(description_chain, twitter=True) + ' #MarkovScience'
 
@@ -115,12 +100,12 @@ def get_tweet():
         tweet = generate_line(
             description_chain, twitter=True) + ' #MarkovScience'
 
-    print tweet
+    print(tweet)
     return tweet
 
 
-def tweet():
-    tweet = get_tweet()
+def tweet(q='*', pages=1):
+    tweet = get_tweet(q, pages)
     auth = tweepy.OAuthHandler(settings.CONSUMER_KEY, settings.CONSUMER_SECRET)
     auth.set_access_token(settings.ACCESS_KEY, settings.ACCESS_SECRET)
     api = tweepy.API(auth)
@@ -128,6 +113,31 @@ def tweet():
     api.update_status(tweet)
 
 
+def usage():
+    print('Usage:')
+    print('-q or --query: enter a search query, defaults to *')
+    print('-p or --pages: enter the number of pages to iterate over, defaults to 1')
+
+
+def main(argv):
+    q = '*'
+    pages = 1
+    try:
+        options, args = getopt.getopt(argv, "hq:p:", ["help", "query=", "pages="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for option, arg in options:
+        if option in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif option in ("-q", "--query"):
+            q = arg
+        elif option in ("-p", "--pages"):
+            pages = arg
+
+    tweet(q, pages)
+
+
 if __name__ == '__main__':
-    # get_tweet()
-    tweet()
+    main(sys.argv[1:])

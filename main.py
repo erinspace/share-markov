@@ -130,7 +130,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="A command line interface for generating random SHARE tweets...")
 
     parser.add_argument('-q', '--query', dest='query', type=str, help='Query to get the initial SHARE text')
-    parser.add_argument('-p', '--pages', dest='pages', type=int, help=' ', nargs='+')
+    parser.add_argument('-p', '--pages', dest='pages', type=int, help=' ')
     parser.add_argument('-c', '--cher', dest='cher', help='The number of results to return per aggretation', action='store_true')
     parser.add_argument('-t', '--tweet', dest='tweet', help='The version of the OSF SHARE API to hit', action='store_true')
 

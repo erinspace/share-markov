@@ -3,6 +3,7 @@
 import sys
 import getopt
 import random
+import argparse
 
 import tweepy
 import requests
@@ -113,31 +114,29 @@ def tweet(q='*', pages=1):
     api.update_status(tweet)
 
 
-def usage():
-    print('Usage:')
-    print('-q or --query: enter a search query, defaults to *')
-    print('-p or --pages: enter the number of pages to iterate over, defaults to 1')
+def parse_args():
+    parser = argparse.ArgumentParser(description="A command line interface for generating random SHARE tweets...")
+
+    parser.add_argument('-q', '--query', dest='query', type=str, help='Query to get the initial SHARE text')
+    parser.add_argument('-p', '--pages', dest='pages', type=str, help=' ', nargs='+')
+    parser.add_argument('-c', '--cher', dest='cher', type=str, help='The number of results to return per aggretation')
+    parser.add_argument('-t', '--tweet', dest='tweet', type=str, help='The version of the OSF SHARE API to hit')
+
+    return parser.parse_args()
 
 
 def main(argv):
     q = '*'
     pages = 1
-    try:
-        options, args = getopt.getopt(argv, "hq:p:", ["help", "query=", "pages="])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-    for option, arg in options:
-        if option in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif option in ("-q", "--query"):
-            q = arg
-        elif option in ("-p", "--pages"):
-            pages = arg
+    args = parse_args()
+
+    if args.query:
+        q = args.query
+    if args.pages:
+        pages = args.pages
 
     tweet(q, pages)
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

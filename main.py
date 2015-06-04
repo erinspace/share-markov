@@ -68,12 +68,12 @@ def generate_line(markov_chain, cher, title=False, title_words=10, twitter=False
 
     start = ' '
 
-    if cher:
-        while not start[0].lower() == 'share':
-            start = random.choice(markov_chain.keys())
-    else:
-        while not start[0][0].isupper():
-            start = random.choice(markov_chain.keys())
+    # if cher:
+    #     while not start[0].lower() == 'share':
+    #         start = random.choice(markov_chain.keys())
+    # else:
+    while not start[0][0].isupper():
+        start = random.choice(markov_chain.keys())
 
     line = list(start)
 
@@ -96,7 +96,12 @@ def generate_line(markov_chain, cher, title=False, title_words=10, twitter=False
 
     sentence = ' '.join(line)
 
-    return sentence.replace('share', 'Cher').replace('Share', 'Cher')
+    if cher:
+        first, rest = sentence.split(' ', 1)
+
+        return "Cher {}".format(rest).replace('share', 'Cher')
+
+    return sentence
 
 
 def get_tweet(q, pages, cher=False):

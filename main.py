@@ -10,7 +10,7 @@ import requests
 
 import settings
 
-OSF_URL = 'https://osf.io/api/v1/share/?q={}&size=250&start={}'
+OSF_URL = 'https://osf.io/api/v1/share/search?q={}&size=250&start={}'
 
 
 def get_title_and_description(q, pages):
@@ -63,12 +63,17 @@ def get_character_count(line):
     return count
 
 
-def generate_line(markov_chain, title=False, title_words=10, twitter=False):
+def generate_line(markov_chain, cher, title=False, title_words=10, twitter=False):
     ''' Takes a dict of markov chains and returns random text!'''
 
     start = ' '
-    while not start[0][0].isupper():
-        start = random.choice(markov_chain.keys())
+
+    if cher:
+        while not start[0].lower() == 'share':
+            start = random.choice(markov_chain.keys())
+    else:
+        while not start[0][0].isupper():
+            start = random.choice(markov_chain.keys())
 
     line = list(start)
 
@@ -89,13 +94,20 @@ def generate_line(markov_chain, title=False, title_words=10, twitter=False):
             next_words = markov_chain[tuple(line[-2:])]
             line += [random.choice(next_words)]
 
-    return ' '.join(line)
+    sentence = ' '.join(line)
+
+    return sentence.replace('share', 'Cher').replace('Share', 'Cher')
 
 
-def get_tweet(q, pages):
+def get_tweet(q, pages, cher=False):
     title_str, description_str = get_title_and_description(q, pages)
     description_chain = make_markov_chain(description_str)
-    tweet = generate_line(description_chain, twitter=True) + ' #MarkovScience'
+    tweet = generate_line(description_chain, cher, twitter=True)
+
+    if cher:
+        tweet += ' #CherResearch'
+    else:
+        tweet += ' #MarkovScience'
 
     while get_character_count(tweet) > 140:
         tweet = generate_line(
@@ -118,14 +130,14 @@ def parse_args():
     parser = argparse.ArgumentParser(description="A command line interface for generating random SHARE tweets...")
 
     parser.add_argument('-q', '--query', dest='query', type=str, help='Query to get the initial SHARE text')
-    parser.add_argument('-p', '--pages', dest='pages', type=str, help=' ', nargs='+')
-    parser.add_argument('-c', '--cher', dest='cher', type=str, help='The number of results to return per aggretation')
-    parser.add_argument('-t', '--tweet', dest='tweet', type=str, help='The version of the OSF SHARE API to hit')
+    parser.add_argument('-p', '--pages', dest='pages', type=int, help=' ', nargs='+')
+    parser.add_argument('-c', '--cher', dest='cher', help='The number of results to return per aggretation', action='store_true')
+    parser.add_argument('-t', '--tweet', dest='tweet', help='The version of the OSF SHARE API to hit', action='store_true')
 
     return parser.parse_args()
 
 
-def main(argv):
+def main():
     q = '*'
     pages = 1
     args = parse_args()
@@ -134,8 +146,13 @@ def main(argv):
         q = args.query
     if args.pages:
         pages = args.pages
+    if args.tweet:
+        tweet(q, pages)
 
-    tweet(q, pages)
+    if args.cher:
+        get_tweet('share', pages, cher=True)
+    else:
+        get_tweet(q, pages)
 
 
 if __name__ == '__main__':

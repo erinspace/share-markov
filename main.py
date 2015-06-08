@@ -1,7 +1,5 @@
 # markov chain title and description generator from SHARE results
 
-import sys
-import getopt
 import random
 import argparse
 

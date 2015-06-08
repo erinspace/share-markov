@@ -116,7 +116,7 @@ def get_tweet(q, pages, cher=False):
 
     while get_character_count(tweet) > 140:
         tweet = generate_line(
-            description_chain, cher, twitter=True) + ' #MarkovScience'
+            description_chain, cher, twitter=True)
 
     print(tweet)
     return tweet

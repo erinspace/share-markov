@@ -80,8 +80,6 @@ def get_character_count(line):
     for word in line:
         for char in word:
             count += 1
-        # count += 1
-
     return count
 
 

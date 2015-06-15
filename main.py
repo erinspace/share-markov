@@ -4,6 +4,7 @@ import random
 import argparse
 
 import tweepy
+import sharepa
 import requests
 
 import settings
@@ -30,6 +31,29 @@ def get_title_and_description(q, pages):
             title += item['title'] + ' '
 
         start += 250
+
+    return title, description
+
+
+def get_sharepa_title_description(q, max_results):
+    ''' Uses sharepa to grab some pages
+    of text from title description, and returns a string
+    '''
+    title = ''
+    description = ''
+    start = 0
+    stop = size = 250
+    num_results = 0
+    # my_search = sharepa.ShareSearch()
+    while num_results < max_results:
+        results = sharepa.basic_search[start:stop].execute()
+        num_results += size
+        for hit in results:
+            title += hit.title + ' '
+            description += hit.description + ' '
+
+        start += size
+        stop += size
 
     return title, description
 
@@ -103,7 +127,8 @@ def generate_line(markov_chain, cher, title=False, title_words=10, twitter=False
 
 
 def get_tweet(q, pages, cher=False):
-    title_str, description_str = get_title_and_description(q, pages)
+    # title_str, description_str = get_title_and_description(q, pages)
+    title_str, description_str = get_sharepa_title_description(q, pages)
     description_chain = make_markov_chain(description_str)
     tweet = generate_line(description_chain, cher, twitter=True)
 

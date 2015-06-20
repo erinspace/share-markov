@@ -125,8 +125,8 @@ def generate_line(markov_chain, cher, title=False, title_words=10, twitter=False
 
 
 def get_tweet(q, pages, cher=False):
-    # title_str, description_str = get_title_and_description(q, pages)
-    title_str, description_str = get_sharepa_title_description(q, pages)
+    title_str, description_str = get_title_and_description(q, pages)
+    # title_str, description_str = get_sharepa_title_description(q, pages)
     description_chain = make_markov_chain(description_str)
     tweet = generate_line(description_chain, cher, twitter=True)
 
